@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     backoff_seconds: float = Field(default=2, gt=0)
     max_backoff_seconds: float = Field(default=60, gt=0)
     request_limit: int = 262144
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg(cls, value: str) -> str:
+        # Managed Postgres providers commonly return the generic SQLAlchemy URL.
+        # This project installs psycopg 3, not psycopg2.
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
 
 
 settings = Settings()
