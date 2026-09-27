@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Literal
 
@@ -41,9 +41,55 @@ class Submission(BaseModel):
         return self
 
 
+DEMO_KEY = "public-demo"
+
+
 def auth(x_api_key: str = Header(default="")):
-    if not secrets.compare_digest(x_api_key.encode(), settings.api_key.encode()):
-        raise HTTPException(401, "Invalid API key")
+    if secrets.compare_digest(x_api_key.encode(), settings.api_key.encode()):
+        return "owner"
+    if settings.demo_mode and x_api_key == DEMO_KEY:
+        return "demo"
+    raise HTTPException(401, "Invalid API key")
+
+
+def owner_only(access: str = Depends(auth)):
+    if access != "owner":
+        raise HTTPException(403, "Owner API key required")
+
+
+def limit_demo_submission(data: "Submission") -> None:
+    if data.task_type not in {
+        "fibonacci",
+        "long_running",
+        "document_processing",
+        "generate_report",
+        "simulated_failure",
+    }:
+        raise HTTPException(403, "Task unavailable in the public demo")
+    p = data.payload
+    if (
+        data.max_retries > 2
+        or (data.scheduled_at and data.scheduled_at > now() + timedelta(days=1))
+        or (data.task_type == "fibonacci" and p["n"] > 1000)
+        or (data.task_type == "long_running" and p["seconds"] > 5)
+        or (data.task_type == "document_processing" and len(p["text"]) > 5000)
+        or (data.task_type == "generate_report" and len(p["rows"]) > 25)
+        or (data.task_type == "simulated_failure" and p["failures"] > 2)
+    ):
+        raise HTTPException(422, "Public demo task exceeds its limits")
+    # One atomic Redis quota shared across all visitors and API instances.
+    key = "queuemaster:demo:" + datetime.now(UTC).strftime("%Y-%m-%d")
+    try:
+        count = redis.eval(
+            "local n=redis.call('INCR',KEYS[1]); "
+            "if n==1 then redis.call('EXPIRE',KEYS[1],172800) end; return n",
+            1,
+            key,
+        )
+    except RedisError:
+        raise HTTPException(503, "Demo quota unavailable") from None
+    if count > settings.demo_daily_limit:
+        raise HTTPException(429, "Public demo daily limit reached; try tomorrow")
 
 
 app = FastAPI(title="QueueMaster", version="0.1.0")
@@ -148,6 +194,11 @@ def health():
     return {"status": "alive"}
 
 
+@app.get("/demo-config", include_in_schema=False)
+def demo_config():
+    return {"enabled": settings.demo_mode}
+
+
 @app.get("/ready")
 def ready():
     try:
@@ -167,7 +218,10 @@ AUTH = [Depends(auth)]
 def create(
     data: Submission,
     idempotency_key: str | None = Header(default=None, min_length=1, max_length=128),
+    access: str = Depends(auth),
 ):
+    if access == "demo":
+        limit_demo_submission(data)
     job, created = submit(data, idempotency_key)
     return JSONResponse(
         {
@@ -247,7 +301,7 @@ def events(job_id: str):
         ]
 
 
-@app.post(PREFIX + "/jobs/{job_id}/cancel", dependencies=AUTH)
+@app.post(PREFIX + "/jobs/{job_id}/cancel", dependencies=[Depends(owner_only)])
 def cancel(job_id: str):
     with Session.begin() as s:
         job = get_job(s, job_id, True)
@@ -256,7 +310,7 @@ def cancel(job_id: str):
         return encoded(job)
 
 
-@app.post(PREFIX + "/jobs/{job_id}/retry", dependencies=AUTH)
+@app.post(PREFIX + "/jobs/{job_id}/retry", dependencies=[Depends(owner_only)])
 def retry(job_id: str):
     with Session.begin() as s:
         job = get_job(s, job_id, True)
