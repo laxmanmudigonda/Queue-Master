@@ -1,6 +1,6 @@
 const $ = (selector) => document.querySelector(selector);
 const keyStore = "queuemaster-api-key";
-const state = { key: sessionStorage.getItem(keyStore) || "", offset: 0, limit: 10, total: 0, jobs: [], busy: false };
+const state = { key: sessionStorage.getItem(keyStore) || "", demo: false, offset: 0, limit: 10, total: 0, jobs: [], busy: false };
 const examples = {
   fibonacci: { n: 25 }, long_running: { seconds: 3 },
   document_processing: { text: "QueueMaster processes work asynchronously.\nEvery attempt is recorded.", filename: "sample.txt" },
@@ -122,8 +122,8 @@ async function showJob(id) {
     const eventBox = section(target,`Events (${events.length})`);
     eventBox.append(...events.map((event) => el("div", "history-item", `${label(event.event_type)} · ${time(event.timestamp)}`)));
     const buttons = el("div", "detail-buttons");
-    if (["pending","retrying"].includes(job.status)) buttons.append(actionButton("Cancel job", `/jobs/${id}/cancel`));
-    if (job.status === "failed") buttons.append(actionButton("Retry job", `/jobs/${id}/retry`));
+    if (!state.demo && ["pending","retrying"].includes(job.status)) buttons.append(actionButton("Cancel job", `/jobs/${id}/cancel`));
+    if (!state.demo && job.status === "failed") buttons.append(actionButton("Retry job", `/jobs/${id}/retry`));
     target.append(buttons); $("#detail").showModal();
   } catch (error) { notify(error.message,true); }
 }
@@ -144,6 +144,7 @@ $("#connect").addEventListener("click", async () => {
   try {
     await api("/stats");
     sessionStorage.setItem(keyStore, key);
+    state.demo = false;
     $("#api-key").value = ""; error.hidden = true; hideAccess();
     notify("Connected. Your jobs and workers are loading.");
     refresh();
@@ -155,7 +156,7 @@ $("#connect").addEventListener("click", async () => {
   } finally { $("#connect").disabled = false; }
 });
 $("#api-key").addEventListener("keydown", (event) => { if (event.key === "Enter") $("#connect").click(); });
-$("#disconnect").addEventListener("click", () => { sessionStorage.removeItem(keyStore); state.key = ""; $("#api-key").value = ""; setConnection(false,"Disconnected"); showAccess(); });
+$("#disconnect").addEventListener("click", () => { sessionStorage.removeItem(keyStore); location.reload(); });
 for (const link of document.querySelectorAll('a[href^="#"]')) link.addEventListener("click", (event) => {
   const view = link.getAttribute("href").slice(1);
   if (!["overview","jobs","workers","submit"].includes(view)) return;
@@ -182,5 +183,17 @@ $("#job-form").addEventListener("submit", async (event) => {
 $("#close-detail").addEventListener("click", () => $("#detail").close());
 $("#detail").addEventListener("click", (event) => { if (event.target === $("#detail")) $("#detail").close(); });
 setView(location.hash.slice(1));
-if (state.key) refresh(); else { setConnection(false,"Connect API key"); showAccess(); }
+fetch("/demo-config", { cache: "no-store" }).then((response) => response.json()).then((config) => {
+  state.demo = Boolean(config.enabled && !sessionStorage.getItem(keyStore));
+  if (state.demo) {
+    state.key = "public-demo";
+    $(".rail-footer").firstChild.textContent = " PUBLIC DEMO ";
+    $("#access-panel p").textContent = "This public demo is shared. Do not submit private information. Job submissions have daily limits; owner controls need a private key.";
+    $("#max-retries").value = "2";
+    $("#max-retries").max = "2";
+    $("#task-type option[value='idempotent_counter']").remove();
+    hideAccess(); refresh();
+  } else if (state.key) refresh();
+  else { setConnection(false,"Connect API key"); showAccess(); }
+}).catch(() => { if (state.key) refresh(); else { setConnection(false,"Connect API key"); showAccess(); } });
 setInterval(() => { if (state.key && !document.hidden) refresh(); }, 10000);
