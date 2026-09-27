@@ -1,0 +1,73 @@
+# Run on an Always Free VM with PUBLIC_DOMAIN set in the shell or .env.
+x-app: &app
+  build: .
+  environment:
+    DATABASE_URL: postgresql+psycopg://queuemaster:${POSTGRES_PASSWORD:?Run scripts/init_env.py}@postgres:5432/queuemaster
+    REDIS_URL: redis://redis:6379/0
+    API_KEY: ${API_KEY:?Run scripts/init_env.py}
+    DEMO_MODE: "true"
+    DEMO_DAILY_LIMIT: "100"
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: queuemaster
+      POSTGRES_DB: queuemaster
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init_env.py}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U queuemaster"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+  migrate:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://queuemaster:${POSTGRES_PASSWORD}@postgres:5432/queuemaster
+      API_KEY: ${API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+  api:
+    <<: *app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 5s
+      retries: 12
+  worker:
+    <<: *app
+    command: ["python", "-m", "app.runtime", "worker"]
+  scheduler:
+    <<: *app
+    command: ["python", "-m", "app.runtime", "scheduler"]
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN to a hostname pointing at this VM}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

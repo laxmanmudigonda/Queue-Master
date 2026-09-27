@@ -8,8 +8,8 @@ The dashboard lets you submit tasks, inspect results and attempt history, filter
 jobs, and monitor workers. The claiming, scheduling, retry, and crash-recovery
 logic is implemented here; QueueMaster does not wrap Celery.
 
-> This is a local portfolio project. A public GitHub repository shares source
-> code; it does not host a running application.
+> The repository shares source code. To host the complete demo, follow the
+> [Always Free VM deployment guide](docs/deployment.md).
 
 ## Features
 
@@ -139,11 +139,11 @@ other workers stopped and an otherwise quiet queue.
 
 ## Scope and security
 
-QueueMaster uses a shared API key and is intended for a trusted local demo. It
-has no user accounts or employee task assignments. A public deployment would
-need authentication, user isolation, rate limits, secret management, and
-private database and Redis access. Never commit `.env` or expose its keys in
-screenshots.
+The local installation requires an API key. The optional public demo mode
+allows bounded anonymous task submission and shared browsing; it is not
+multi-tenant and must not store private information. Public users cannot
+cancel or retry jobs. Keep PostgreSQL and Redis private, and never commit
+`.env` or share the owner API key. See [deployment](docs/deployment.md).
 
 ## Attribution
 
