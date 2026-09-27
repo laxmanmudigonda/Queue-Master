@@ -13,7 +13,7 @@ jobs:
       - run: pip install -e '.[dev]'
       - run: python -m ruff check . && python -m ruff format --check .
       - run: python scripts/init_env.py
-      - run: python -m json.tool firebase.json > /dev/null && node --check firebase-demo/demo-engine.js && node --check firebase-demo/app.js
+      - run: python -m json.tool firebase.json > /dev/null && node --check firebase-demo/app.js && node --test tests/browser_demo.test.cjs
       - run: docker compose -p qm-tests -f compose.test.yml up -d --wait
       - run: python scripts/test_native.py
       - run: docker compose up -d --build --scale worker=2 --wait
