@@ -1,0 +1,72 @@
+# Review Render's resource prices before deploying this multi-service Blueprint.
+services:
+  - type: web
+    name: queuemaster-api
+    runtime: docker
+    plan: 0.5c-512mb
+    region: singapore
+    healthCheckPath: /ready
+    preDeployCommand: python -m alembic upgrade head
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: queuemaster-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: queuemaster-queue
+          type: keyvalue
+          property: connectionString
+      - key: API_KEY
+        generateValue: true
+
+  - type: worker
+    name: queuemaster-worker
+    runtime: docker
+    plan: 0.5c-512mb
+    region: singapore
+    dockerCommand: python -m app.runtime worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: queuemaster-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: queuemaster-queue
+          type: keyvalue
+          property: connectionString
+      - key: API_KEY
+        generateValue: true
+
+  - type: worker
+    name: queuemaster-scheduler
+    runtime: docker
+    plan: 0.5c-512mb
+    region: singapore
+    dockerCommand: python -m app.runtime scheduler
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: queuemaster-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: queuemaster-queue
+          type: keyvalue
+          property: connectionString
+      - key: API_KEY
+        generateValue: true
+
+  - type: keyvalue
+    name: queuemaster-queue
+    plan: 256mb
+    region: singapore
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: queuemaster-db
+    plan: 0.1c-256mb
+    region: singapore
+    ipAllowList: []
