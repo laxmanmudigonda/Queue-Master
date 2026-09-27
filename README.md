@@ -8,8 +8,10 @@ The dashboard lets you submit tasks, inspect results and attempt history, filter
 jobs, and monitor workers. The claiming, scheduling, retry, and crash-recovery
 logic is implemented here; QueueMaster does not wrap Celery.
 
-> The repository shares source code. To host the complete demo, follow the
-> [Always Free VM deployment guide](docs/deployment.md).
+> A [Firebase Hosting browser demo](docs/firebase-hosting.md) can be published
+> on the no-cost Spark plan. It simulates jobs in each visitor's browser. The
+> Python, PostgreSQL, and Redis engine in this repository runs locally with
+> Docker; see the setup below.
 
 ## Features
 
@@ -139,11 +141,10 @@ other workers stopped and an otherwise quiet queue.
 
 ## Scope and security
 
-The local installation requires an API key. The optional public demo mode
-allows bounded anonymous task submission and shared browsing; it is not
-multi-tenant and must not store private information. Public users cannot
-cancel or retry jobs. Keep PostgreSQL and Redis private, and never commit
-`.env` or share the owner API key. See [deployment](docs/deployment.md).
+The local backend installation requires an API key. The Firebase browser demo
+stores jobs only in the visitor's browser and is clearly labeled as a
+simulation. Keep PostgreSQL and Redis private, and never commit `.env` or
+share the owner API key. See [Firebase Hosting](docs/firebase-hosting.md).
 
 ## Attribution
 
