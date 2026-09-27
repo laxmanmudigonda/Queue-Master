@@ -34,7 +34,10 @@ def main():
                 response.raise_for_status()
                 job = response.json()
                 if job["status"] != last_status:
-                    print(f"Job {job_id}: {job['status']} (attempts={job['attempt_count']})", flush=True)
+                    print(
+                        f"Job {job_id}: {job['status']} (attempts={job['attempt_count']})",
+                        flush=True,
+                    )
                     last_status = job["status"]
                 if first.poll() is not None:
                     raise RuntimeError(f"Worker exited with code {first.returncode}")
