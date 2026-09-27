@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     backoff_seconds: float = Field(default=2, gt=0)
     max_backoff_seconds: float = Field(default=60, gt=0)
     request_limit: int = 262144
+    demo_mode: bool = False
+    demo_daily_limit: int = Field(default=100, ge=1)
 
     @field_validator("database_url")
     @classmethod
