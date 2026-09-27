@@ -1,5 +1,13 @@
 # QueueMaster
 
+## Live demo
+
+**[Open the QueueMaster browser demo](https://queue-master-b4564.web.app)**
+
+Hosted on Firebase. This interactive demo simulates jobs in your browser and saves
+its data on your device. The real FastAPI, PostgreSQL, and Redis backend is
+included in this repository and can be run locally with Docker.
+
 **A background-job processing engine with an interactive operations dashboard.**
 
 QueueMaster accepts tasks through FastAPI, keeps durable state in PostgreSQL,
@@ -8,10 +16,8 @@ The dashboard lets you submit tasks, inspect results and attempt history, filter
 jobs, and monitor workers. The claiming, scheduling, retry, and crash-recovery
 logic is implemented here; QueueMaster does not wrap Celery.
 
-> A [Firebase Hosting browser demo](docs/firebase-hosting.md) can be published
-> on the no-cost Spark plan. It simulates jobs in each visitor's browser. The
-> Python, PostgreSQL, and Redis engine in this repository runs locally with
-> Docker; see the setup below.
+> Deployment instructions: [Firebase Hosting browser demo](docs/firebase-hosting.md).
+> For the real backend, follow the Docker setup below.
 
 ## Features
 
