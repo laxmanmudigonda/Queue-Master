@@ -1,0 +1,56 @@
+x-app: &app
+  build: .
+  environment:
+    DATABASE_URL: postgresql+psycopg://queuemaster:${POSTGRES_PASSWORD:?Run scripts/init_env.py}@postgres:5432/queuemaster
+    REDIS_URL: redis://redis:6379/0
+    API_KEY: ${API_KEY:?Run scripts/init_env.py}
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: queuemaster
+      POSTGRES_DB: queuemaster
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init_env.py}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    ports: ["127.0.0.1:5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U queuemaster"]
+      interval: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+  migrate:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://queuemaster:${POSTGRES_PASSWORD}@postgres:5432/queuemaster
+      API_KEY: ${API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+  api:
+    <<: *app
+    ports: ["127.0.0.1:8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 5s
+      retries: 10
+  worker:
+    <<: *app
+    command: ["python", "-m", "app.runtime", "worker"]
+  scheduler:
+    <<: *app
+    command: ["python", "-m", "app.runtime", "scheduler"]
+volumes:
+  pgdata:

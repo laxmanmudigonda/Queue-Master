@@ -1,0 +1,20 @@
+# Dedicated disposable infrastructure: no volumes, separate ports, never production data.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: queuemaster
+      POSTGRES_DB: queuemaster_test
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Generate .env first}
+    ports: ["127.0.0.1:15433:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U queuemaster -d queuemaster_test"]
+      interval: 2s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:16380:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 20

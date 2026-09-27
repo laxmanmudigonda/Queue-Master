@@ -1,0 +1,20 @@
+........ss{"event": "claimed", "job_id": "e818082e-cbc4-4a89-8290-12520cdebc78", "worker_id": "16c0b7ac-8c56-4d84-b5dc-e305aebbd1cf", "attempt": 1}
+.{"event": "claimed", "job_id": "f87765cd-5b82-4a47-b5ab-d119ab24a9f7", "worker_id": "beb55bb5-8868-464f-a6bf-29ce4d22fd55", "attempt": 1}
+{"event": "claimed", "job_id": "f87765cd-5b82-4a47-b5ab-d119ab24a9f7", "worker_id": "a2f47c41-949d-4db5-9e12-afc19ccbf551", "attempt": 2}
+Recovery elapsed: 19.752s
+....{"event": "claimed", "job_id": "1c1d8ce3-1dfc-42ab-8e9e-6f803b8332b3", "worker_id": "b1e28796-42b8-45d6-905f-d51cee938827", "attempt": 1}
+{"event": "claimed", "job_id": "a174c4e3-b43c-499f-b694-3ca2d2a8c550", "worker_id": "57ea9450-3860-4fb2-a149-f61d44fb8650", "attempt": 1}
+.{"event": "claimed", "job_id": "89166e23-e8e2-4635-b57a-085c291e3291", "worker_id": "59a8be85-c6cd-44a1-9d8d-39db69755186", "attempt": 1}
+.{"event": "claimed", "job_id": "dff8f490-cd1b-4763-9240-318cdfc5de0e", "worker_id": "e478d33d-2594-4d39-8ca7-b9adb777fe60", "attempt": 1}
+{"event": "claimed", "job_id": "dff8f490-cd1b-4763-9240-318cdfc5de0e", "worker_id": "e478d33d-2594-4d39-8ca7-b9adb777fe60", "attempt": 2}
+..............................................
+=============================== warnings summary ===============================
+../../../../root/.local/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /root/.local/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/scratch/fd15b18690e5/queuemaster/docs/test-results.xml -
+61 passed, 2 skipped, 1 warning in 33.84s
+No new upgrade operations detected.
+No new upgrade operations detected.

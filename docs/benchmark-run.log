@@ -1,0 +1,20 @@
+........ss{"event": "claimed", "job_id": "65004ece-d537-47c7-8414-33d22c39004b", "worker_id": "a3b95f7c-577d-4f0f-a2a6-757b888e7a60", "attempt": 1}
+.{"event": "claimed", "job_id": "0fcb1cca-0996-46ef-8d25-ef3cce08bf34", "worker_id": "9503b9f5-3049-43f7-a128-e11b70367ae0", "attempt": 1}
+{"event": "claimed", "job_id": "0fcb1cca-0996-46ef-8d25-ef3cce08bf34", "worker_id": "35f58347-ee4c-4e8b-9126-98eaf01743ce", "attempt": 2}
+Recovery elapsed: 19.723s
+....{"event": "claimed", "job_id": "11dbc54b-c240-45d9-abbb-d22dfdf55fbb", "worker_id": "24951d42-5daf-4f44-b310-40830bc0b2d6", "attempt": 1}
+{"event": "claimed", "job_id": "8dfa97b3-abd5-49b4-95b0-9a5fe58add4d", "worker_id": "acdc1ecf-ed98-4dcf-9d78-3d75368c77bf", "attempt": 1}
+.{"event": "claimed", "job_id": "2ad279f8-c45f-41fe-a58c-540af14bfb24", "worker_id": "16888865-438b-4748-9189-7a12665f5c3a", "attempt": 1}
+.............................................
+=============================== warnings summary ===============================
+../../../../root/.local/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /root/.local/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/scratch/fd15b18690e5/queuemaster/docs/test-results.xml -
+59 passed, 2 skipped, 1 warning in 28.91s
+{"jobs": 100, "workers": 1, "elapsed_seconds": 39.217, "submission_mean_ms": 4.608, "submission_p95_ms": 7.309, "throughput_jobs_per_second": 2.55, "mean_attempt_seconds": 0.3813, "mean_queue_wait_seconds": 19.3783, "completed": 100, "failed": 0}
+{"jobs": 100, "workers": 4, "elapsed_seconds": 11.587, "submission_mean_ms": 4.586, "submission_p95_ms": 7.834, "throughput_jobs_per_second": 8.63, "mean_attempt_seconds": 0.4264, "mean_queue_wait_seconds": 5.418, "completed": 100, "failed": 0}
+{"jobs": 1000, "workers": 1, "elapsed_seconds": 399.1, "submission_mean_ms": 3.978, "submission_p95_ms": 4.973, "throughput_jobs_per_second": 2.506, "mean_attempt_seconds": 0.3896, "mean_queue_wait_seconds": 196.5099, "completed": 1000, "failed": 0}
+{"jobs": 1000, "workers": 4, "elapsed_seconds": 136.083, "submission_mean_ms": 4.421, "submission_p95_ms": 7.699, "throughput_jobs_per_second": 7.348, "mean_attempt_seconds": 0.5275, "mean_queue_wait_seconds": 65.707, "completed": 1000, "failed": 0}

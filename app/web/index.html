@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101728">
+  <title>QueueMaster | Operations console</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand"><span class="brand-icon">Q<span class="brand-dot">.</span></span><span>QueueMaster<small>OPERATIONS CONSOLE</small></span></div>
+      <nav aria-label="Main navigation">
+        <a href="#overview" class="nav-link active">◫ <span>Overview</span></a>
+        <a href="#jobs" class="nav-link">▤ <span>Jobs</span></a>
+        <a href="#workers" class="nav-link">⌘ <span>Workers</span></a>
+        <a href="#submit" class="nav-link">＋ <span>New job</span></a>
+      </nav>
+      <div class="rail-footer"><span class="live-dot"></span> LOCAL ENVIRONMENT <small>FastAPI · PostgreSQL · Redis</small></div>
+    </aside>
+    <main>
+      <header class="topbar"><div class="crumb">WORKSPACE <span>/</span> <strong>Overview</strong></div><div class="top-actions"><span id="connection" class="connection">● Checking service</span><button type="button" id="refresh" class="btn quiet">↻ Refresh</button><button type="button" id="settings-toggle" class="btn quiet">⚙ Access</button></div></header>
+      <div class="content">
+        <section class="hero" id="overview"><div><div class="eyebrow">DISTRIBUTED TASK PROCESSING <span class="divider"></span> CONTROL CENTER</div><h1>Every job.<br><em>Under control.</em></h1><p>Submit work, monitor your queue, and inspect every execution attempt from one place.</p><div class="hero-actions"><a href="#submit" class="btn primary">＋ Create a job</a><a href="#jobs" class="btn hero-secondary">Explore jobs ↗</a></div></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-1"></div><div class="orbit orbit-2"></div><div class="orbit orbit-3"></div><div class="orbit-center">Q</div><div class="orbit-pill pill-a">✓ &nbsp;completed</div><div class="orbit-pill pill-b">◷ &nbsp;processing</div></div></section>
+        <section id="access-panel" class="access card" hidden><div><div class="overline">ONE-TIME SETUP</div><h2>Connect your local dashboard</h2><p>Open <code>C:\Documents\QueueMaster\.env</code> in VS Code, copy only the value after <code>API_KEY=</code>, and paste it below. This key stays in this browser tab. Never share it in a screenshot or commit it to GitHub.</p><p id="access-error" class="access-error" role="alert" hidden></p></div><div class="access-controls"><label for="api-key">Local API key</label><input id="api-key" type="password" autocomplete="off" placeholder="Paste API_KEY value"><button type="button" id="connect" class="btn primary">Connect &amp; load dashboard</button><button type="button" id="disconnect" class="btn quiet">Clear key</button></div></section>
+        <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+        <section class="metrics" aria-label="Queue metrics"><article class="metric card"><span class="metric-icon purple">▤</span><span class="metric-name">Total jobs</span><strong id="total">—</strong><span class="metric-foot">Across all states</span></article><article class="metric card"><span class="metric-icon green">✓</span><span class="metric-name">Completed</span><strong id="completed">—</strong><span class="metric-foot">Successfully processed</span></article><article class="metric card"><span class="metric-icon amber">◷</span><span class="metric-name">In progress</span><strong id="in-progress">—</strong><span class="metric-foot">Running + waiting</span></article><article class="metric card"><span class="metric-icon blue">⌘</span><span class="metric-name">Active workers</span><strong id="active-workers">—</strong><span class="metric-foot">Live heartbeats</span></article></section>
+        <section class="section" id="jobs"><div class="section-header"><div><div class="overline">THE PIPELINE</div><h2>Jobs <span class="subdued" id="job-count"></span></h2></div><div class="section-actions"><label class="sr-only" for="status-filter">Filter by status</label><select id="status-filter"><option value="">All statuses</option><option>pending</option><option>running</option><option>retrying</option><option>completed</option><option>failed</option><option>cancelled</option></select><button type="button" id="reload-jobs" class="btn quiet">↻ Reload</button></div></div><div class="card table-wrap"><table><thead><tr><th>JOB / TASK</th><th>STATUS</th><th>ATTEMPTS</th><th>CREATED</th><th></th></tr></thead><tbody id="job-rows"><tr><td colspan="5" class="empty">Connect your API to see jobs.</td></tr></tbody></table><div class="table-footer"><span id="page-label">Showing 0 jobs</span><div><button id="previous" class="btn quiet" type="button">← Previous</button><button id="next" class="btn quiet" type="button">Next →</button></div></div></div></section>
+        <div class="bottom-grid"><section class="section" id="submit"><div class="section-header"><div><div class="overline">CREATE WORK</div><h2>Submit a job</h2></div></div><form id="job-form" class="card form"><div class="form-row"><label for="task-type">Task type</label><select id="task-type"><option value="fibonacci">Fibonacci sequence</option><option value="long_running">Timed task</option><option value="document_processing">Document analysis</option><option value="generate_report">CSV report</option><option value="simulated_failure">Retry simulation</option><option value="idempotent_counter">Durable counter</option></select></div><div class="form-row"><label for="payload">JSON payload <span class="hint">Edit the example to customize</span></label><textarea id="payload" rows="5" spellcheck="false">{"n":25}</textarea></div><div class="form-split"><div class="form-row"><label for="priority">Priority</label><select id="priority"><option>normal</option><option>high</option><option>low</option></select></div><div class="form-row"><label for="max-retries">Max retries</label><input id="max-retries" type="number" min="0" max="20" value="3"></div></div><div class="form-row"><label for="scheduled-at">Schedule for later <span class="hint">Optional, your local time</span></label><input id="scheduled-at" type="datetime-local"></div><button class="btn primary submit-btn" type="submit">Submit job <span>↗</span></button></form></section><section class="section" id="workers"><div class="section-header"><div><div class="overline">EXECUTION FLEET</div><h2>Workers</h2></div></div><div class="card workers-card"><div id="worker-list" class="worker-list"><p class="empty">Connect your API to see workers.</p></div></div><div class="tip"><span>↗</span><div><strong>Built for resilience</strong><p>Expiring leases return abandoned jobs to the queue. Each retry retains its history for inspection.</p></div></div></section></div>
+        <footer>QueueMaster <span>·</span> Built for reliable background work <a href="/docs" target="_blank" rel="noopener">API documentation ↗</a></footer>
+      </div>
+    </main>
+  </div>
+  <dialog id="detail"><div class="dialog-head"><div><div class="overline">JOB INSPECTOR</div><h2 id="detail-title">Job details</h2></div><button id="close-detail" type="button" class="icon-button" aria-label="Close details">×</button></div><div id="detail-content"></div></dialog>
+</body>
+</html>
